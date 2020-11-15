@@ -1,0 +1,2 @@
+# CliTestClient_readline
+一个linux上依赖readline库的仿bash命令行功能的测试使用Client。
