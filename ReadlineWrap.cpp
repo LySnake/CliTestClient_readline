@@ -7,14 +7,19 @@
 #include <errno.h>
 #include <time.h>
 
-
 #include <utility>
+
+
+#include "ReadlineWrap.h"
+#include "utils.h"
+#include "Commands.h"
 #include "threadPrint.h"   //模仿异步事件，打印到终端
 
-static td::shared_ptr<ReadlineWrap> instance = nullptr;
+static std::shared_ptr<ReadlineWrap> instance = nullptr;
 
 
-ReadlineWrap::COMMAND::COMMAND(std::string name, rl_icpfunc_t *func, std::string doc, std::string help):CmdName(std::move(name)), CmdFunc(func), CmdDoc(std::move(doc), CmdHelp(std::move(help)))
+ReadlineWrap::COMMAND::COMMAND(std::string name, rl_icpfunc_t func, std::string doc, std::string help):
+                              CmdName(std::move(name)), CmdFunc(func), CmdDoc(std::move(doc)), CmdHelp(std::move(help))
 {
 }
 
@@ -31,6 +36,11 @@ const std::string &ReadlineWrap::COMMAND::getCmdDoc()
 const std::string &ReadlineWrap::COMMAND::getCmdHelp()
 {
   return CmdHelp;
+}
+
+int ReadlineWrap::COMMAND::runCmd(char *line)
+{
+   CmdFunc(line);
 }
 
 
@@ -74,9 +84,9 @@ char * ReadlineWrap::generator(const char *text, int state)
     }
 
   /* Return the next name which partially matches from the command list. */
-    for (; i < list_index < listCommands.size();)
+    for (;list_index < vecCommands.size();)
     {
-        COMMAND cmd = listCommands[list_index];
+        COMMAND cmd = vecCommands[list_index];
         list_index++;
         
         if (strncmp (cmd.getCmdName().c_str(), text, len) == 0)
@@ -88,7 +98,7 @@ char * ReadlineWrap::generator(const char *text, int state)
 }
 
 
-ReadlineWrap::ReadlineWrap()
+ReadlineWrap::ReadlineWrap():isRuningFlag(true)
 {
     initialize();
 }
@@ -99,61 +109,22 @@ void ReadlineWrap::initialize()
     rl_attempted_completion_function = &ReadlineWrap::completion;
 }
 
-void ReadlineWrap::(COMMAND &cmd)
+void ReadlineWrap::addCommand(COMMAND &cmd)
 {
-    listCommands.push_back(cmd);
+    vecCommands.push_back(cmd);
 }
 
-
-
-
-// typedef struct {
-//   char *name;			/* User printable name of the function. */
-//   rl_icpfunc_t *func;		/* Function to call to do the job. */
-//   char *doc;			/* Documentation for this function.  */
-// } COMMAND;
-
-// int com_cd (char *arg)
-// {
-//   if (chdir (arg) == -1)
-//     {
-//       perror (arg);
-//       return 1;
-//     }
-
-//   com_pwd ("");
-//   return (0);
-// }
-
-// COMMAND commands[] = {
-//   { "cd", com_cd, "Change to directory DIR" },
-//   { (char *)NULL, (rl_icpfunc_t *)NULL, (char *)NULL }
-// };
-
-// void valid_argument(char* caller, char* arg)
-// {
-//   if (!arg || !*arg)
-//     {
-//       fprintf (stderr, "%s: Argument required.\n", caller);
-//       return (0);
-//     }
-
-//   return (1);
-// }
-
-
-
-
-
-int main(int argc, char *argv[])
+void ReadlineWrap::stopReadline()
 {
-    initializeReadline();
+  isRuningFlag = false;
+}
 
-    StartThread();
-  /* Loop reading and executing lines until the user quits. */
-  for ( ; done == 0; )
+void ReadlineWrap::runReadline()
+{
+  char *line, *s;
+  for ( ; isRuningFlag; )
     {
-      line = readline ("FileMan: ");
+      line = readline (READLINE_NAME);
 
       if (!line)
         break;
@@ -166,12 +137,54 @@ int main(int argc, char *argv[])
       if (*s)
         {
           add_history (s);
-          execute_line (s);
+          execute (s);
         }
 
       free (line);
     }
-  StopThread();
-  exit (0);
-
 }
+
+int ReadlineWrap::execute(char *line)
+{
+  register int i;
+  char *word;
+
+  /* Isolate the command word. */
+  i = 0;
+  while (line[i] && whitespace (line[i]))
+    i++;
+  word = line + i;
+
+  while (line[i] && !whitespace (line[i]))
+    i++;
+
+  if (line[i])
+    line[i++] = '\0';
+
+  COMMAND command = getCommand(word);
+
+  /* Get argument to command, if any. */
+  while (whitespace (line[i]))
+    i++;
+
+  word = line + i;
+
+  /* Call the function. */
+  return command.runCmd(word);
+}
+
+ReadlineWrap::COMMAND & ReadlineWrap::getCommand(char *name)
+{
+    for (auto &&cmd : vecCommands)
+    {
+        if(cmd.getCmdName() == name)
+        {
+          return cmd;
+        }
+    }
+    
+    return cmd_fail;
+}
+
+
+

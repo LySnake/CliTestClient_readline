@@ -16,30 +16,24 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-EXECUTABLES = fileman rltest rl
-CFLAGS  = -g -I../.. -I.. -DREADLINE_LIBRARY
-LDFLAGS = -g -L..
+CFLAGS  = -g -I. -Ilib/readline -DREADLINE_LIBRARY
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+.cpp.o:
+	$(CXX) $(CFLAGS)  --std=c++11 -c $<
+all: test
 
-all: $(EXECUTABLES)
+
+test: main.o ReadlineWrap.o  Commands.o utils.o
+	$(CXX) $(CFLAGS) -o $@ main.o ReadlineWrap.o threadPrint.o Commands.o utils.o  -lreadline -ltermcap  -pthread 
+
+# threadPrint.o: threadPrint.cpp
+main.o: main.cpp
+ReadlineWrap.o: ReadlineWrap.cpp
+Commands.o: Commands.cpp
+utils.o: utils.cpp
 
 
-rl: rl.o
-	$(CC) $(LDFLAGS) -o $@   rl.o -lreadline -ltermcap  
-
-fileman: fileman.o threadPrint.o
-	$(CC) $(LDFLAGS) -o $@ fileman.o threadPrint.o -lreadline -ltermcap -pthread 
-
-rltest: rltest.o
-	$(CC) $(LDFLAGS) -o $@ rltest.o -lreadline -ltermcap
-
-rlcat: rlcat.o
-	$(CC) $(LDFLAGS) -o $@ rlcat.o -lreadline -ltermcap
-
-fileman.o: fileman.c
-rltest.o: rltest.c
-rl.o: rl.c
-rlcat.o: rlcat.c
-threadPrint.o: threadPrint.c
+clean:
+	rm *.o
