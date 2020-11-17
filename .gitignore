@@ -1,2 +1,5 @@
 /.vscode
 /*.o
+/lib/readline/examples/*.o
+/lib/readline/examples/fileman
+/test

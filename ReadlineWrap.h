@@ -5,11 +5,27 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include "Command.h"
+#include <stdio.h>
+// #include "Command.h"
 
+
+extern "C" {
+
+#ifdef READLINE_LIBRARY
+#  include "readline.h"
+#  include "history.h"
+#else
+#  include <readline/readline.h>
+#  include <readline/history.h>
+#endif
+
+extern char *xmalloc PARAMS((size_t));
+
+}
 
 #define READLINE_NAME "CliClient >"
 
+class Command;
 
 class ReadlineWrap
 {

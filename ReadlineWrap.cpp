@@ -13,8 +13,7 @@
 #include "ReadlineWrap.h"
 #include "utils.h"
 #include "CommandList.h"
-#include "threadPrint.h"   //模仿异步事件，打印到终端
-
+// #include "threadPrint.h"   //模仿异步事件，打印到终端
 
 std::shared_ptr<ReadlineWrap> ReadlineWrap::instance = nullptr;
 std::vector<Command> ReadlineWrap::vecCommands;

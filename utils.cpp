@@ -1,5 +1,6 @@
 #include <string.h>
 #include "utils.h"
+#include "ReadlineWrap.h"
 
 char *dupstr (const char *s)
 {

@@ -6,14 +6,7 @@
 #include <string>
 #include <string.h>
 
-
-#ifdef READLINE_LIBRARY
-#  include "readline.h"
-#  include "history.h"
-#else
-#  include <readline/readline.h>
-#  include <readline/history.h>
-#endif
+#include "ReadlineWrap.h"
 
 using RL_ICPFUNC_T = std::function<rl_icpfunc_t>;
 
