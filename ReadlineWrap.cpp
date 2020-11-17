@@ -1,11 +1,12 @@
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <linux/limits.h>
 
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
+#include <unistd.h>
 
 #include <utility>
 
@@ -96,7 +97,15 @@ void ReadlineWrap::runReadline()
   char *line, *s;
   for ( ; isRuningFlag; )
     {
-      line = readline (READLINE_NAME);
+      char cwd[PATH_MAX];
+      if( !getcwd(cwd, sizeof(cwd)))
+      {
+        printf("getcwd fail: %s\n", strerror(errno));
+        return ;
+      }
+      char prompt [PATH_MAX + sizeof(READLINE_NAME)];
+      sprintf(prompt, "%s>", cwd);
+      line = readline (prompt );
 
       if (!line)
         break;
