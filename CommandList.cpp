@@ -1,4 +1,4 @@
-#include "Commands.h"
+#include "CommandList.h"
 
 
 int cmd_exit(char * args)
@@ -15,11 +15,11 @@ int cmd_not_exist(char * args)
 
 
 
-COMMAND cmd_fail = COMMAND("not exist cmd", cmd_not_exist, "cmd_not_exist ", "cmd_not_exist ");
+Command cmd_fail = Command("not exist cmd", cmd_not_exist, "cmd_not_exist ", "cmd_not_exist ");
 
 void initializeCommands()
 {
-    COMMAND do_exit = COMMAND("exit", 
+    Command do_exit = Command("exit", 
                                                     cmd_exit, 
                                                     "exit_doc", 
                                                     "exit_help");

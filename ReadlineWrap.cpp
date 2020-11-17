@@ -12,39 +12,12 @@
 
 #include "ReadlineWrap.h"
 #include "utils.h"
-#include "Commands.h"
+#include "CommandList.h"
 #include "threadPrint.h"   //模仿异步事件，打印到终端
 
-static std::shared_ptr<ReadlineWrap> instance = nullptr;
 
-
-ReadlineWrap::COMMAND::COMMAND(std::string name, rl_icpfunc_t func, std::string doc, std::string help):
-                              CmdName(std::move(name)), CmdFunc(func), CmdDoc(std::move(doc)), CmdHelp(std::move(help))
-{
-}
-
-const std::string &ReadlineWrap::COMMAND::getCmdName()
-{
-  return CmdName;
-}
-
-const std::string &ReadlineWrap::COMMAND::getCmdDoc()
-{
-  return CmdDoc;
-}
-
-const std::string &ReadlineWrap::COMMAND::getCmdHelp()
-{
-  return CmdHelp;
-}
-
-int ReadlineWrap::COMMAND::runCmd(char *line)
-{
-   CmdFunc(line);
-}
-
-
-
+std::shared_ptr<ReadlineWrap> ReadlineWrap::instance = nullptr;
+std::vector<Command> ReadlineWrap::vecCommands;
 
 std::shared_ptr<ReadlineWrap> &ReadlineWrap::getInstance()
 {
@@ -86,7 +59,7 @@ char * ReadlineWrap::generator(const char *text, int state)
   /* Return the next name which partially matches from the command list. */
     for (;list_index < vecCommands.size();)
     {
-        COMMAND cmd = vecCommands[list_index];
+        Command cmd = vecCommands[list_index];
         list_index++;
         
         if (strncmp (cmd.getCmdName().c_str(), text, len) == 0)
@@ -109,7 +82,7 @@ void ReadlineWrap::initialize()
     rl_attempted_completion_function = &ReadlineWrap::completion;
 }
 
-void ReadlineWrap::addCommand(COMMAND &cmd)
+void ReadlineWrap::addCommand(Command &cmd)
 {
     vecCommands.push_back(cmd);
 }
@@ -161,7 +134,7 @@ int ReadlineWrap::execute(char *line)
   if (line[i])
     line[i++] = '\0';
 
-  COMMAND command = getCommand(word);
+  Command command = getCommand(word);
 
   /* Get argument to command, if any. */
   while (whitespace (line[i]))
@@ -173,7 +146,7 @@ int ReadlineWrap::execute(char *line)
   return command.runCmd(word);
 }
 
-ReadlineWrap::COMMAND & ReadlineWrap::getCommand(char *name)
+Command & ReadlineWrap::getCommand(char *name)
 {
     for (auto &&cmd : vecCommands)
     {

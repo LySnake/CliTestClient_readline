@@ -17,6 +17,7 @@
 #
 
 CFLAGS  = -g -I. -Ilib/readline -DREADLINE_LIBRARY
+LDFLAGS = -g -Llib/readline
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -25,14 +26,15 @@ CFLAGS  = -g -I. -Ilib/readline -DREADLINE_LIBRARY
 all: test
 
 
-test: main.o ReadlineWrap.o  Commands.o utils.o
-	$(CXX) $(CFLAGS) -o $@ main.o ReadlineWrap.o threadPrint.o Commands.o utils.o  -lreadline -ltermcap  -pthread 
+test: main.o ReadlineWrap.o  CommandList.o utils.o Command.o
+	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ main.o Command.o ReadlineWrap.o CommandList.o utils.o  -lreadline -ltermcap  -pthread 
 
 # threadPrint.o: threadPrint.cpp
 main.o: main.cpp
 ReadlineWrap.o: ReadlineWrap.cpp
-Commands.o: Commands.cpp
+CommandList.o: CommandList.cpp
 utils.o: utils.cpp
+Command.o: Command.cpp
 
 
 clean:
