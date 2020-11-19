@@ -1,14 +1,13 @@
 #include "ReadlineWrap.h"
 #include "CommandList.h"
-// #include "threadPrint.h"
+#include "PrintThread.h"
 
 int main(int argc, char *argv[])
 {
     initializeCommands();
 
-    // StartThread();
+    PrintThread AsynPrint;  //异步打印，验证终端显示
     ReadlineWrap::getInstance()->runReadline();
-    // StopThread();
 
     exit(0);
 }

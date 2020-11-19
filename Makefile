@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+CPP_OBJS= ReadlineWrap.o main.o PrintThread.o CommandList.o utils.o Command.o
 CFLAGS  = -g -I. -Ilib/readline -DREADLINE_LIBRARY
 LDFLAGS = -g -Llib/readline
 
@@ -26,12 +26,12 @@ LDFLAGS = -g -Llib/readline
 all: test
 
 
-test: main.o ReadlineWrap.o  CommandList.o utils.o Command.o
-	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ main.o Command.o ReadlineWrap.o CommandList.o utils.o  -lreadline -ltermcap  -pthread 
+test: $(CPP_OBJS)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(CPP_OBJS)  -lreadline -ltermcap  -pthread 
 
-# threadPrint.o: threadPrint.cpp
-main.o: main.cpp
 ReadlineWrap.o: ReadlineWrap.cpp
+main.o: main.cpp
+PrintThread.o: PrintThread.cpp
 CommandList.o: CommandList.cpp
 utils.o: utils.cpp
 Command.o: Command.cpp
