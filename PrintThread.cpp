@@ -27,8 +27,8 @@ void PrintThread::DoPrint()
     while (ThreadRunFlag)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(3 * 1000));
-        printf("\npthread print log:  %s.\n", rl_line_buffer);
 
+        rl_crlf();
         rl_on_new_line();
         rl_redisplay();
     }
