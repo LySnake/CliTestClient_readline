@@ -1,41 +1,38 @@
-# This is the Makefile for the examples subdirectory of readline. -*- text -*-
-#
-# Copyright (C) 1994 Free Software Foundation, Inc.
+CXXFLAGS := -g -std=c++11 -DREADLINE_LIBRARY
 
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-CPP_OBJS= ReadlineWrap.o main.o PrintThread.o CommandList.o utils.o Command.o
-CFLAGS  = -g -I. -Ilib/readline -DREADLINE_LIBRARY
-LDFLAGS = -g -Llib/readline
+OBJ_PATH := .
+SRC_PATH := .
+INCLUDE_PATH := -I.\
+                -Ilib/readline
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-.cpp.o:
-	$(CXX) $(CFLAGS)  --std=c++11 -c $<
-all: test
+SRCS  := $(wildcard $(SRC_PATH)/*.cpp)
+OBJS := $(patsubst $(SRC_PATH)/%.cpp, $(OBJ_PATH)/%.o, $(SRCS))
+DEPS := $(patsubst $(SRC_PATH)/%.cpp, $(OBJ_PATH)/%.d, $(SRCS))
+
+TARGET := testClient
+
+.PHONY: all
+all : $(TARGET)
+	@echo compile all finish.
+
+$(TARGET) : $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ -lreadline -ltermcap  -pthread 
 
 
-test: $(CPP_OBJS)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(CPP_OBJS)  -lreadline -ltermcap  -pthread 
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c -o $@ $<
 
-ReadlineWrap.o: ReadlineWrap.cpp
-main.o: main.cpp
-PrintThread.o: PrintThread.cpp
-CommandList.o: CommandList.cpp
-utils.o: utils.cpp
-Command.o: Command.cpp
+#生成*.d，*.d中记录了cpp与依赖的*.h的生成依赖关系，保证每次源码修改每一个CPP可以直接make成最新的状态，而避免全编译
+$(OBJ_PATH)/%.d : $(SRC_PATH)/%.cpp
+	@set -e; rm -f $@; \
+	$(CXX) -MM $(CXXFLAGS) $(INCLUDE_PATH) $< > $@.$$$$;\
+	sed 's,\($*\)\.o[ :]*,/\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
 
+-include $(DEPS)
 
-clean:
-	rm *.o
+.PHONY: clean
+clean :
+	@rm -rf $(OBJ_PATH)/*.o  $(OBJ_PATH)/*.d $(OBJ_PATH)/*.d.*
+	@rm -rf $(TARGET)
+	@echo "Clean finish!"

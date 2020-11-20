@@ -3,3 +3,4 @@
 /lib/readline/examples/*.o
 /lib/readline/examples/fileman
 /test
+/*.d
