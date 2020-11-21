@@ -3,9 +3,10 @@ CXXFLAGS := -g -std=c++11 -DREADLINE_LIBRARY
 OBJ_PATH := .
 SRC_PATH := .
 INCLUDE_PATH := -I.\
-                -Ilib/readline
+                -Ilib/readline\
+                -Ilib/spdlog/include/
 
-SRCS  := $(wildcard $(SRC_PATH)/*.cpp)
+SRCS := $(wildcard $(SRC_PATH)/*.cpp)
 OBJS := $(patsubst $(SRC_PATH)/%.cpp, $(OBJ_PATH)/%.o, $(SRCS))
 DEPS := $(patsubst $(SRC_PATH)/%.cpp, $(OBJ_PATH)/%.d, $(SRCS))
 
@@ -16,7 +17,7 @@ all : $(TARGET)
 	@echo compile all finish.
 
 $(TARGET) : $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ -lreadline -ltermcap  -pthread 
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ -lreadline -pthread 
 
 
 %.o : %.cpp

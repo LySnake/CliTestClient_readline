@@ -4,3 +4,4 @@
 /lib/readline/examples/fileman
 /test
 /*.d
+/*.d.*
