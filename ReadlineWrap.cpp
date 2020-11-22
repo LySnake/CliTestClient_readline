@@ -14,7 +14,7 @@
 #include "ReadlineWrap.h"
 #include "utils.h"
 #include "CommandList.h"
-// #include "threadPrint.h"   //模仿异步事件，打印到终端
+#include "spdlog/spdlog.h"
 
 std::shared_ptr<ReadlineWrap> ReadlineWrap::instance = nullptr;
 std::vector<Command> ReadlineWrap::vecCommands;
@@ -100,7 +100,7 @@ void ReadlineWrap::runReadline()
       char cwd[PATH_MAX];
       if( !getcwd(cwd, sizeof(cwd)))
       {
-        printf("getcwd fail: %s\n", strerror(errno));
+        spdlog::info("getcwd fail: {}\n", strerror(errno));
         return ;
       }
       char prompt [PATH_MAX + sizeof(READLINE_NAME)];
@@ -127,38 +127,38 @@ void ReadlineWrap::runReadline()
 
 int ReadlineWrap::execute(char *line)
 {
-  register int i;
-  char *word;
+  int cmdStartIndex = 0, argsStartIndex;
+  std::string cmdName;
+  std::string args;
 
-  /* Isolate the command word. */
-  i = 0;
-  while (line[i] && whitespace (line[i]))
-    i++;
-  word = line + i;
+  while (line[cmdStartIndex] && whitespace (line[cmdStartIndex]))
+    cmdStartIndex++;
 
-  while (line[i] && !whitespace (line[i]))
-    i++;
+  argsStartIndex = cmdStartIndex;
+  while (line[argsStartIndex] && !whitespace (line[argsStartIndex]))
+    argsStartIndex++;
 
-  if (line[i])
-    line[i++] = '\0';
+  if (line[argsStartIndex])
+    line[argsStartIndex++] = '\0';
 
-  Command command = getCommand(word);
+  cmdName = line + cmdStartIndex;
+  Command command = getCommand(cmdName);
 
   /* Get argument to command, if any. */
-  while (whitespace (line[i]))
-    i++;
+  while (whitespace (line[argsStartIndex]))
+    argsStartIndex++;
 
-  word = line + i;
+  args = line + argsStartIndex;
 
   /* Call the function. */
-  return command.runCmd(word);
+  return command.runCmd(cmdName, args);
 }
 
-Command & ReadlineWrap::getCommand(char *name)
+Command & ReadlineWrap::getCommand(const std::string &cmdName)
 {
     for (auto &&cmd : vecCommands)
     {
-        if(cmd.getCmdName() == name)
+        if(cmd.getCmdName() == cmdName)
         {
           return cmd;
         }

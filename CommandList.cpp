@@ -4,38 +4,47 @@
 #include <unistd.h>
 
 #include "CommandList.h"
+#include "spdlog/spdlog.h"
 
 
-int func_exit(char * args)
+int func_exit(const std::string &cmdName, const std::string &args)
 {
     ReadlineWrap::getInstance()->stopReadline();
     return 0;
 }
 
-int func_cd(char * args)
+int func_cd(const std::string &cmdName, const std::string &args)
 {
-    chdir(args);
+    if(chdir(args.c_str())) {
+        spdlog::info("chdir fail: {}\n", strerror(errno));
+        return -1;
+    }
     return 0;
 }
 
-int func_pwd(char *args)
+int func_pwd(const std::string &cmdName, const std::string &args)
 {     
     char cwd[PATH_MAX];
     if( !getcwd(cwd, sizeof(cwd)))
     {
-        printf("getcwd fail: %s\n", strerror(errno));
+        spdlog::info("getcwd fail: {}\n", strerror(errno));
         return -1;
     }
-    printf("%s\n", cwd);
+    spdlog::info("{}\n", cwd);
     return 0;
 }
 
-int func_not_exist(char * args)
-{
-    printf("Command does not exist.\n");
+int func_not_exist(const std::string &cmdName, const std::string &args)
+{   
+    std::string cmd = cmdName;
+    cmd += " ";
+    cmd += args;
+    if(system(cmd.c_str()) == -1) {
+        spdlog::info("shell command fail. {}\n", strerror(errno));
+        return -1;
+    }
     return 0;
 }
-
 
 
 Command cmd_fail = Command("__not_exist_cmd__", func_not_exist, "", "");

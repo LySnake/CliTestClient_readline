@@ -40,7 +40,7 @@ class ReadlineWrap
         ~ReadlineWrap() = default;
         void initialize();
         int execute(char *line);
-        Command & getCommand(char *name);
+        Command & getCommand(const std::string & cmdName);
         static char * generator(const char *text, int state);
         static char ** completion(const char* text, int start, int end);
 
