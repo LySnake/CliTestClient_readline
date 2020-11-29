@@ -73,17 +73,17 @@ void initializeCommands()
                                   "print command history.",
                                   "usag: history");
     Command cmd_exit = Command("exit", 
-                            func_exit, 
-                            "exit program.", 
-                            "usag: exit");
+                                func_exit, 
+                                "exit program.", 
+                                "usag: exit");
     Command cmd_cd = Command("cd", 
-                            func_cd, 
-                            "change work directory.", 
-                            "usag: cd directory.");
+                             func_cd, 
+                             "change work directory.", 
+                             "usag: cd directory.");
     Command cmd_pwd = Command("pwd", 
-                            func_pwd, 
-                            "Prints the current working directory.", 
-                            "usag: pwd");
+                              func_pwd, 
+                              "Prints the current working directory.", 
+                              "usag: pwd");
 
                             
     ReadlineWrap::getInstance()->addCommand(cmd_history);

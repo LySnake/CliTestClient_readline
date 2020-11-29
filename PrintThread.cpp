@@ -19,7 +19,7 @@ PrintThread::~PrintThread()
 
 void PrintThread::startThread()
 {
-    p_PrintThread = new std::thread(&PrintThread::DoPrint, this);
+    p_PrintThread = std::shared_ptr<std::thread>(new std::thread(&PrintThread::DoPrint, this));
 }
 
 void PrintThread::DoPrint()

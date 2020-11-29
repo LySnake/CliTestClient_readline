@@ -17,7 +17,7 @@ private:
 
 private:
     bool  ThreadRunFlag;
-    std::thread *p_PrintThread;
+    std::shared_ptr<std::thread> p_PrintThread;
 };
 
 
