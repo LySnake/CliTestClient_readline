@@ -31,9 +31,10 @@ class ReadlineWrap
 {
     public:
         static std::shared_ptr<ReadlineWrap>& getInstance();
-        void addCommand(Command &cmd);
+        void addCommands(const std::vector<Command> &vecCmds);
         void runReadline();
         void stopReadline();
+        void printAllCmdHelp();
 
     private:
         ReadlineWrap();

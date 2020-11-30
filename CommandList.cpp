@@ -2,6 +2,7 @@
 #include <linux/limits.h>
 #include <errno.h>
 #include <unistd.h>
+#include <vector>
 
 #include "CommandList.h"
 #include "spdlog/spdlog.h"
@@ -63,31 +64,49 @@ static int func_not_exist(const std::string &cmdName, const std::string &args)
     return 0;
 }
 
+static int func_help(const std::string &cmdHelp, const std::string &args)
+{
+    ReadlineWrap::getInstance()->printAllCmdHelp();
+    return 0;
+}
+
 
 Command cmd_fail = Command("__not_exist_cmd__", func_not_exist, "", "");
 
 void initializeCommands()
 {
-    Command cmd_history = Command("history",
-                                  func_history,
-                                  "print command history.",
-                                  "usag: history");
-    Command cmd_exit = Command("exit", 
-                                func_exit, 
-                                "exit program.", 
-                                "usag: exit");
-    Command cmd_cd = Command("cd", 
-                             func_cd, 
-                             "change work directory.", 
-                             "usag: cd directory.");
-    Command cmd_pwd = Command("pwd", 
-                              func_pwd, 
-                              "Prints the current working directory.", 
-                              "usag: pwd");
-
+    std::vector<Command> vecCommands = {
+        {
+            "pwd", 
+            func_pwd, 
+            "Prints the current working directory.", 
+            "usag: pwd"
+        },
+        {
+            "cd", 
+            func_cd, 
+            "change work directory.", 
+            "usag: cd directory."
+        },
+        {
+            "exit", 
+            func_exit, 
+            "exit program.", 
+            "usag: exit"
+        },
+        {
+            "history",
+            func_history,
+            "print command history.",
+            "usag: history"
+        },
+        {
+            "help",
+            func_help,
+            "print all command help infomation",
+            "usag: help"
+        }
+    };
                             
-    ReadlineWrap::getInstance()->addCommand(cmd_history);
-    ReadlineWrap::getInstance()->addCommand(cmd_exit);
-    ReadlineWrap::getInstance()->addCommand(cmd_cd);
-    ReadlineWrap::getInstance()->addCommand(cmd_pwd);
+    ReadlineWrap::getInstance()->addCommands(vecCommands);
 }

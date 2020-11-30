@@ -10,7 +10,6 @@
 
 #include <utility>
 
-
 #include "ReadlineWrap.h"
 #include "utils.h"
 #include "CommandList.h"
@@ -82,14 +81,24 @@ void ReadlineWrap::initialize()
     rl_attempted_completion_function = &ReadlineWrap::completion;
 }
 
-void ReadlineWrap::addCommand(Command &cmd)
+void ReadlineWrap::addCommands(const std::vector<Command> &vecCmds)
 {
-    vecCommands.push_back(cmd);
+    vecCommands.insert(vecCommands.end(), vecCmds.begin(), vecCmds.end());
 }
 
 void ReadlineWrap::stopReadline()
 {
   isRuningFlag = false;
+}
+
+void ReadlineWrap::printAllCmdHelp()
+{
+    for (auto &&cmd : vecCommands)
+    {
+        spdlog::info("cmd: {}", cmd.getCmdName());
+        spdlog::info("doc:{}", cmd.getCmdDoc());
+        spdlog::info("help:{}\n", cmd.getCmdHelp());
+    }
 }
 
 void ReadlineWrap::runReadline()
