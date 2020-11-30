@@ -14,34 +14,34 @@
 #include "utils.h"
 #include "CommandList.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 std::shared_ptr<ReadlineWrap> ReadlineWrap::instance = nullptr;
 std::vector<Command> ReadlineWrap::vecCommands;
 
 std::shared_ptr<ReadlineWrap> &ReadlineWrap::getInstance()
 {
-    if (instance == nullptr)
-    {
-        instance = std::shared_ptr<ReadlineWrap>(new ReadlineWrap());
-        return instance;
-    }
+  if (instance == nullptr)
+  {
+    instance = std::shared_ptr<ReadlineWrap>(new ReadlineWrap());
     return instance;
+  }
+  return instance;
 }
 
-
-char ** ReadlineWrap::completion(const char* text, int start, int end)
+char **ReadlineWrap::completion(const char *text, int start, int end)
 {
   char **matches;
 
   matches = (char **)NULL;
 
   if (start == 0)
-    matches = rl_completion_matches (text, &ReadlineWrap::generator);
+    matches = rl_completion_matches(text, &ReadlineWrap::generator);
 
   return (matches);
 }
 
-char * ReadlineWrap::generator(const char *text, int state)
+char *ReadlineWrap::generator(const char *text, int state)
 {
   static int list_index, len;
   char *name;
@@ -50,40 +50,39 @@ char * ReadlineWrap::generator(const char *text, int state)
      saving the length of TEXT for efficiency, and initializing the index
      variable to 0. */
   if (!state)
-    {
-      list_index = 0;
-      len = strlen (text);
-    }
+  {
+    list_index = 0;
+    len = strlen(text);
+  }
 
   /* Return the next name which partially matches from the command list. */
-    for (;list_index < vecCommands.size();)
-    {
-        Command cmd = vecCommands[list_index];
-        list_index++;
-        
-        if (strncmp (cmd.getCmdName().c_str(), text, len) == 0)
-          return (dupstr(cmd.getCmdName().c_str()));
-    }
+  for (; list_index < vecCommands.size();)
+  {
+    Command cmd = vecCommands[list_index];
+    list_index++;
+
+    if (strncmp(cmd.getCmdName().c_str(), text, len) == 0)
+      return (dupstr(cmd.getCmdName().c_str()));
+  }
 
   /* If no names matched, then return NULL. */
   return ((char *)NULL);
 }
 
-
-ReadlineWrap::ReadlineWrap():isRuningFlag(true)
+ReadlineWrap::ReadlineWrap() : isRuningFlag(true)
 {
-    initialize();
+  initialize();
 }
 
 void ReadlineWrap::initialize()
 {
-    rl_readline_name = READLINE_NAME;
-    rl_attempted_completion_function = &ReadlineWrap::completion;
+  rl_readline_name = READLINE_NAME;
+  rl_attempted_completion_function = &ReadlineWrap::completion;
 }
 
 void ReadlineWrap::addCommands(const std::vector<Command> &vecCmds)
 {
-    vecCommands.insert(vecCommands.end(), vecCmds.begin(), vecCmds.end());
+  vecCommands.insert(vecCommands.end(), vecCmds.begin(), vecCmds.end());
 }
 
 void ReadlineWrap::stopReadline()
@@ -93,45 +92,47 @@ void ReadlineWrap::stopReadline()
 
 void ReadlineWrap::printAllCmdHelp()
 {
-    for (auto &&cmd : vecCommands)
-    {
-        spdlog::info("cmd: {}", cmd.getCmdName());
-        spdlog::info("doc:{}", cmd.getCmdDoc());
-        spdlog::info("help:{}\n", cmd.getCmdHelp());
-    }
+  for (auto &&cmd : vecCommands)
+  {
+    spdlog::info("cmd: {}", cmd.getCmdName());
+    spdlog::info("doc:{}", cmd.getCmdDoc());
+    spdlog::info("help:{}\n", cmd.getCmdHelp());
+  }
 }
 
 void ReadlineWrap::runReadline()
 {
   char *line, *s;
-  for ( ; isRuningFlag; )
+  auto historyLoger = spdlog::rotating_logger_mt("history", ".history", 1024 * 1024, 3, true);
+  for (; isRuningFlag;)
+  {
+    char cwd[PATH_MAX];
+    if (!getcwd(cwd, sizeof(cwd)))
     {
-      char cwd[PATH_MAX];
-      if( !getcwd(cwd, sizeof(cwd)))
-      {
-        spdlog::info("getcwd fail: {}\n", strerror(errno));
-        return ;
-      }
-      char prompt [PATH_MAX + sizeof(READLINE_NAME)];
-      sprintf(prompt, "%s>", cwd);
-      line = readline (prompt );
+      spdlog::info("getcwd fail: {}\n", strerror(errno));
+      return;
+    }
+    char prompt[PATH_MAX + sizeof(READLINE_NAME)];
+    sprintf(prompt, "%s>", cwd);
+    line = readline(prompt);
 
-      if (!line)
-        break;
+    historyLoger->info("{}", line);
+    if (!line)
+      break;
 
-      /* Remove leading and trailing whitespace from the line.
+    /* Remove leading and trailing whitespace from the line.
          Then, if there is anything left, add it to the history list
          and execute it. */
-      s = stripwhite (line);
+    s = stripwhite(line);
 
-      if (*s)
-        {
-          add_history (s);
-          execute (s);
-        }
-
-      free (line);
+    if (*s)
+    {
+      add_history(s);
+      execute(s);
     }
+
+    free(line);
+  }
 }
 
 int ReadlineWrap::execute(char *line)
@@ -140,11 +141,11 @@ int ReadlineWrap::execute(char *line)
   std::string cmdName;
   std::string args;
 
-  while (line[cmdStartIndex] && whitespace (line[cmdStartIndex]))
+  while (line[cmdStartIndex] && whitespace(line[cmdStartIndex]))
     cmdStartIndex++;
 
   argsStartIndex = cmdStartIndex;
-  while (line[argsStartIndex] && !whitespace (line[argsStartIndex]))
+  while (line[argsStartIndex] && !whitespace(line[argsStartIndex]))
     argsStartIndex++;
 
   if (line[argsStartIndex])
@@ -154,7 +155,7 @@ int ReadlineWrap::execute(char *line)
   Command command = getCommand(cmdName);
 
   /* Get argument to command, if any. */
-  while (whitespace (line[argsStartIndex]))
+  while (whitespace(line[argsStartIndex]))
     argsStartIndex++;
 
   args = line + argsStartIndex;
@@ -163,18 +164,15 @@ int ReadlineWrap::execute(char *line)
   return command.runCmd(cmdName, args);
 }
 
-Command & ReadlineWrap::getCommand(const std::string &cmdName)
+Command &ReadlineWrap::getCommand(const std::string &cmdName)
 {
-    for (auto &&cmd : vecCommands)
+  for (auto &&cmd : vecCommands)
+  {
+    if (cmd.getCmdName() == cmdName)
     {
-        if(cmd.getCmdName() == cmdName)
-        {
-          return cmd;
-        }
+      return cmd;
     }
-    
-    return cmd_fail;
+  }
+
+  return cmd_fail;
 }
-
-
-
