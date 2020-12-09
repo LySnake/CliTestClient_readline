@@ -2,9 +2,8 @@
 #include "CommandList.h"
 #include "PrintThread.h"
 
-
-#include "spdlog/spdlog.h"
-#include "spdlog/cfg/env.h" // for loading levels from the environment variable
+#include "spdlog/cfg/env.h"
+#include "project.h"
 
 int main(int argc, char *argv[])
 {

@@ -11,10 +11,8 @@
 #include <utility>
 
 #include "ReadlineWrap.h"
-#include "utils.h"
 #include "CommandList.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/rotating_file_sink.h"
+#include "project.h"
 
 std::shared_ptr<ReadlineWrap> ReadlineWrap::instance = nullptr;
 std::vector<Command> ReadlineWrap::vecCommands;
@@ -62,7 +60,7 @@ char *ReadlineWrap::generator(const char *text, int state)
     list_index++;
 
     if (strncmp(cmd.getCmdName().c_str(), text, len) == 0)
-      return (dupstr(cmd.getCmdName().c_str()));
+      return (tool::dupstr(cmd.getCmdName().c_str()));
   }
 
   /* If no names matched, then return NULL. */
@@ -123,7 +121,7 @@ void ReadlineWrap::runReadline()
     /* Remove leading and trailing whitespace from the line.
          Then, if there is anything left, add it to the history list
          and execute it. */
-    s = stripwhite(line);
+    s = tool::stripwhite(line);
 
     if (*s)
     {

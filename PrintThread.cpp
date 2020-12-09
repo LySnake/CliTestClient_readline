@@ -3,6 +3,7 @@
 
 #include "ReadlineWrap.h"
 #include "PrintThread.h"
+#include "project.h"
 
 const unsigned int iSleepTime = 3;
 

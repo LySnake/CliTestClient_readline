@@ -1,4 +1,5 @@
 #include "Command.h"
+#include "project.h"
 
 
 Command::Command(std::string name, EXEC_CMD_FUNC func, std::string doc, std::string help):

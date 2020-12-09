@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "CommandList.h"
-#include "spdlog/spdlog.h"
+#include "project.h"
 
 extern HIST_ENTRY **history_list ();
 
