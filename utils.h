@@ -7,11 +7,19 @@
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
-namespace tool {
-    char *stripwhite(char * str);
-    char *dupstr(const char*);
 
-    void Backtrace(size_t depth = 1);
-} //namespace tool
+#ifdef __cplusplus
+extern "C" {
+    namespace tool {
+#endif
+        char *stripwhite(char * str);
+        char *dupstr(const char*);
+
+        void Backtrace(size_t depth = 1);
+    
+#ifdef __cplusplus
+    } //namespace tool
+}
+#endif
 
 #endif //__UTILS_H__
